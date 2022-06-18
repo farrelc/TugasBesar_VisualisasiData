@@ -1,22 +1,17 @@
 # !pip install geopandas
 # !pip install pyshp
 
+import numpy as np
 import pandas as pd
 import geopandas as gpd
-import json
 from bokeh.io import curdoc
-from bokeh.models import (CDSView, ColorBar, ColumnDataSource,
-                          CustomJS, CustomJSFilter, 
+from bokeh.models import (ColorBar, ColumnDataSource,
                           GeoJSONDataSource, HoverTool,
-                          LinearColorMapper, Slider)
+                          LinearColorMapper, Slider, Select)
 from bokeh.layouts import column, row, widgetbox
 from bokeh.palettes import brewer
 from bokeh.plotting import figure
-
-import re
-import random
-import shapefile
-from shapely.geometry import shape, Point
+from shapely.geometry import Point
 
 df = pd.read_csv('data/players_active.csv')
 gdf = gpd.read_file('map/ne_110m_admin_0_countries.shp')[['ADMIN', 'geometry']]
@@ -113,6 +108,55 @@ p.add_tools(HoverTool(renderers = [sites],
                                   ('Position', '@position'),
                                   ('Market Value in £ (Pounds)', '@value'),
                                   ]))
+
+def update(attr, old, new):
+    df_temp = p_df.copy() 
+    age = slider.value
+    option = opt_select.value
+    country = ct_select.value
+    if option == 'Default':
+        slider.visible = False
+        df_temp = p_df.copy()
+    else:
+        slider.visible = True
+        df_temp = p_df[p_df['age'] == int(age)]
+    
+    if country != 'All':
+        df_temp = df_temp[df_temp['country'] == country]
+    else:
+        df_temp = df_temp
+    sitesource.data = df_temp
+
+# Creating Slider
+slider = Slider(title='Age', start=16, end=40, step=1, value=16)
+
+# Changing value
+slider.on_change('value', update)
+
+# Create a dropdown Select widget for the show option: opt_select
+opt_select = Select(
+    options=['Default', 'Filter by Age'],
+    value='Default',
+    title='Optional'
+)
+# Attach the update_plot callback to the 'value' property of opt_select
+opt_select.on_change('value', update)
+
+# Get country
+countries = list(np.unique(np.array(p_df['country'])))
+countries.insert(0, 'All')
+
+# Create a dropdown Select widget for the countrie data: ct_select
+ct_select = Select(
+    options=countries,
+    value='All',
+    title='Country'
+)
+# Attach the update_plot callback to the 'value' property of ct_select
+ct_select.on_change('value', update)
+
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
-layout = column(p)
+slider.visible = False
+layout = column(ct_select, p, widgetbox(opt_select, slider))
+
 curdoc().add_root(layout)
