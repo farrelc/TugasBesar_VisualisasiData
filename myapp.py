@@ -6,7 +6,7 @@ from bokeh.models import (ColorBar, ColumnDataSource,
                           GeoJSONDataSource, HoverTool,
                           LinearColorMapper, Slider, Select,
                           TableColumn, DataTable)
-from bokeh.layouts import column, row
+from bokeh.layouts import column
 from bokeh.palettes import brewer
 from bokeh.plotting import figure
 
