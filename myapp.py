@@ -119,10 +119,12 @@ def update(attr, old, new):
         slider.visible = True
         df_temp = p_df[p_df['age'] == int(age)]
     
-    if country != 'All':
-        df_temp = df_temp[df_temp['country'] == country]
-    else:
+    if country == 'All':
         df_temp = df_temp
+    elif country == 'Only Populations':
+        df_temp = df_temp[df_temp['country'] == '']
+    else:
+        df_temp = df_temp[df_temp['country'] == country]
     sitesource.data = df_temp
 
 # Creating Slider
@@ -142,6 +144,7 @@ opt_select.on_change('value', update)
 
 # Get country
 countries = list(np.unique(np.array(p_df['country'])))
+countries.insert(0, 'Only Populations')
 countries.insert(0, 'All')
 
 # Create a dropdown Select widget for the countrie data: ct_select
