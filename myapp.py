@@ -9,7 +9,6 @@ from bokeh.models import (ColorBar, ColumnDataSource,
 from bokeh.layouts import column, row
 from bokeh.palettes import brewer
 from bokeh.plotting import figure
-from shapely.geometry import Point
 
 df = pd.read_csv('data/players_active.csv')
 gdf = gpd.read_file('map/ne_110m_admin_0_countries.shp')[['ADMIN', 'geometry']]
@@ -72,30 +71,12 @@ p.add_tools(HoverTool(renderers = [country],
 # Specify layout
 p.add_layout(color_bar, 'below')
 
-# Create shapely.Point objects based on longitude and latitude
-df_cleaned = pd.read_csv('data/final.csv')
-geometry = []
-for index, row in df_cleaned.iterrows():
-    geometry.append(Point(row['LongitudeMeasure'], 
-                          row['LatitudeMeasure']))
-lead_sites_contig = df_cleaned.copy()
-lead_sites_contig['geometry'] = geometry
-
-# Read dataframe to geodataframe
-lead_sites_crs = {'init': 'epsg:4326'}
-lead_sites_geo = gpd.GeoDataFrame(lead_sites_contig,
-                                  crs = lead_sites_crs,
-                             geometry = lead_sites_contig.geometry)
-# Get x and y coordinates
-lead_sites_geo['x'] = [geometry.x for geometry in lead_sites_geo['geometry']]
-lead_sites_geo['y'] = [geometry.y for geometry in lead_sites_geo['geometry']]
-p_df = lead_sites_geo.drop('geometry', axis = 1).copy()
-p_df = p_df[['country', 'pretty_name', 'position', 'value', 'age', 'market_value_in_gbp', 'x', 'y']]
-
+# Import data of football players 
+p_df = pd.read_csv('data/final.csv')
 sitesource = ColumnDataSource(p_df)
 
-# Plots the water sampling sites based on month in slider
-sites = p.circle('x', 'y', source = sitesource, color = 'red', 
+# Plots the football players 
+sites = p.circle('LongitudeMeasure', 'LatitudeMeasure', source = sitesource, color = 'red', 
                  size = 5, alpha = 0.3)
 # Add hover tool
 p.add_tools(HoverTool(renderers = [sites],
@@ -150,7 +131,7 @@ countries = list(np.unique(np.array(p_df['country'])))
 countries.insert(0, 'Only Populations')
 countries.insert(0, 'All')
 
-# Create a dropdown Select widget for the countrie data: ct_select
+# Create a dropdown Select widget for the countries data: ct_select
 ct_select = Select(
     options=countries,
     value='All',
@@ -169,6 +150,7 @@ columns = [
 ]
 
 table = DataTable(source=sitesource, columns=columns, width=950)
+
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
 slider.visible = False
 layout = column(ct_select, p, column(opt_select, slider), table)
