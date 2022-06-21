@@ -120,10 +120,13 @@ def update(attr, old, new):
         df_temp = p_df[p_df['age'] == int(age)]
     
     if country == 'All':
+        table.visible = True
         df_temp = df_temp
     elif country == 'Only Populations':
+        table.visible = False
         df_temp = df_temp[df_temp['country'] == '']
     else:
+        table.visible = True
         df_temp = df_temp[df_temp['country'] == country]
     sitesource.data = df_temp
 
@@ -165,8 +168,9 @@ columns = [
     TableColumn(field="market_value_in_gbp", title="Market Value in £ (Pounds)"),
 ]
 
+table = DataTable(source=sitesource, columns=columns, width=950)
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
 slider.visible = False
-layout = column(ct_select, p, column(opt_select, slider), DataTable(source=sitesource, columns=columns, width=950))
+layout = column(ct_select, p, column(opt_select, slider), table)
 
 curdoc().add_root(layout)
