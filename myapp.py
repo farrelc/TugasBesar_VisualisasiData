@@ -1,14 +1,12 @@
-# !pip install geopandas
-# !pip install pyshp
-
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 from bokeh.io import curdoc
 from bokeh.models import (ColorBar, ColumnDataSource,
                           GeoJSONDataSource, HoverTool,
-                          LinearColorMapper, Slider, Select)
-from bokeh.layouts import column, row, widgetbox
+                          LinearColorMapper, Slider, Select,
+                          TableColumn, DataTable)
+from bokeh.layouts import column, row
 from bokeh.palettes import brewer
 from bokeh.plotting import figure
 from shapely.geometry import Point
@@ -92,7 +90,7 @@ lead_sites_geo = gpd.GeoDataFrame(lead_sites_contig,
 lead_sites_geo['x'] = [geometry.x for geometry in lead_sites_geo['geometry']]
 lead_sites_geo['y'] = [geometry.y for geometry in lead_sites_geo['geometry']]
 p_df = lead_sites_geo.drop('geometry', axis = 1).copy()
-p_df = p_df[['country', 'pretty_name', 'position', 'value', 'age', 'x', 'y']]
+p_df = p_df[['country', 'pretty_name', 'position', 'value', 'age', 'market_value_in_gbp', 'x', 'y']]
 
 sitesource = ColumnDataSource(p_df)
 
@@ -155,8 +153,17 @@ ct_select = Select(
 # Attach the update_plot callback to the 'value' property of ct_select
 ct_select.on_change('value', update)
 
+# Create column for table
+columns = [
+    TableColumn(field="pretty_name", title="Name"),
+    TableColumn(field="age", title="Age"),
+    TableColumn(field="country", title="Country"),
+    TableColumn(field="position", title="Position"),
+    TableColumn(field="market_value_in_gbp", title="Market Value in £ (Pounds)"),
+]
+
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
 slider.visible = False
-layout = column(ct_select, p, widgetbox(opt_select, slider))
+layout = column(ct_select, p, column(opt_select, slider), DataTable(source=sitesource, columns=columns, width=950))
 
 curdoc().add_root(layout)
