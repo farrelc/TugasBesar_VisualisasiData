@@ -135,7 +135,8 @@ countries.insert(0, 'All')
 ct_select = Select(
     options=countries,
     value='All',
-    title='Country'
+    title='Country',
+    width=940
 )
 # Attach the update_plot callback to the 'value' property of ct_select
 ct_select.on_change('value', update)
@@ -146,13 +147,13 @@ columns = [
     TableColumn(field="age", title="Age"),
     TableColumn(field="country", title="Country"),
     TableColumn(field="position", title="Position"),
-    TableColumn(field="market_value_in_gbp", title="Market Value in £ (Pounds)"),
+    TableColumn(field="market_value_in_gbp", title="Market Value in £"),
 ]
 
-table = DataTable(source=sitesource, columns=columns, width=950)
+table = DataTable(source=sitesource, columns=columns, width=550, height=600)
 
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
 slider.visible = False
-layout = column(ct_select, p, column(opt_select, slider), table)
+layout = grid([ct_select, [p, table], [opt_select, slider]])
 
 curdoc().add_root(layout)
