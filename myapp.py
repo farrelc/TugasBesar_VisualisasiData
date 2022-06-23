@@ -149,7 +149,6 @@ columns = [
     TableColumn(field="position", title="Position"),
     TableColumn(field="market_value_in_gbp", title="Market Value in £"),
 ]
-
 table = DataTable(source=sitesource, columns=columns, width=550, height=600)
 
 # Make a column layout of widgetbox(slider) and plot, and add it to the current document
